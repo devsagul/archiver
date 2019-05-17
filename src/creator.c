@@ -6,6 +6,54 @@
 
 #include "archiver.h"
 
+static void append_integer(FILE* file, int nbr)
+{
+	char bytes[5];
+	size_t written;
+
+	bytes[0] = (nbr >> 0x18) & 0xFF;
+	bytes[1] = (nbr >> 0x10) & 0xFF;
+	bytes[2] = (nbr >> 0x08) & 0xFF;
+	bytes[3] = nbr & 0xFF;
+	written = fwrite(file, sizeof(char), 4, bytes);
+	if (written != 4)
+	{
+		perror("Error writing file");
+		exit(EXIT_FAILURE);
+	}
+}
+
+static void append_string(FILE *file, char *str)
+{
+	size_t written;
+	size_t len;
+
+	len = strlen(s);
+	append_integer(file, len);
+	written = fwrite(file, sizeof(char), len, str);
+	if (written != len)
+	{
+		perror("Error writing file");
+		exit(EXIT_FAILURE);
+	}
+}
+
+static void append_file(FILE *file, char *filename)
+{
+
+}
+
+static void *parse_file(FILE *file)
+{
+	// todo: finish
+	return NULL;
+}
+
+static char *extract_meta(/* smth */)
+{
+	return NULL;
+}
+
 int create_archive(char *archive_name, char **members, int member_count)
 {
 	int i;
@@ -24,19 +72,13 @@ int create_archive(char *archive_name, char **members, int member_count)
 		exit(EXIT_FAILURE);
 	}
 	meta = extract_meta(tree);
-	append_integer(archive, strlen(meta));
 	append_string(archive, meta);
+	free(meta);
 	serialized = serialize_tree(tree);
-	append_ineger(archive, strlen(serialized));
 	append_string(archive, serialized);
 	destroy_tree(tree);
-	for (i = 0; i < member_count; i++) {
-		tmp = append_file(archive, members[i]);
-		if (tmp == EOF) {
-			perror("Error adding file to the tree");
-			exit(EXIT_FAILURE);
-		}
-	}
+	for (i = 0; i < member_count; i++)
+		append_file(archive, members[i]);}
 	tmp = fclose(archive);
 	if (tmp == EOF)	{
 		perror("Error closing file");
