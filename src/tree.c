@@ -18,36 +18,27 @@ t_tree			*init_tree(unsigned long value)
 	return res;
 }
 
-t_tree			*insert_child(t_tree *tree, unsigned long value)
-{
-	t_tree		*res;
-	t_tree		*tmp;
-
-	res = init_tree(value);
-	if (res == NULL)
-		return NULL;
-	tmp = realloc(tree->children, sizeof(t_tree) * (tree->children_count + 1));
-	if (tmp == NULL) {
-		free(res);
-		return NULL;
-	}
-	tree->children[tree->children_count] = res;
-	tree->children_count++;
-	res->parent = tree;
-	return res;
-}
-
 static t_tree		*insert_child_t(t_tree *tree, t_tree *child)
 {
-	t_tree		*tmp;
+	t_tree		**tmp;
 
-	tmp = realloc(tree->children, sizeof(t_tree) * (tree->children_count + 1));
+	tmp = realloc(tree->children, sizeof(t_tree *) *
+				      (tree->children_count + 1));
 	if (tmp == NULL)
 		return NULL;
+	tree->children = tmp;
 	tree->children[tree->children_count] = child;
 	tree->children_count++;
 	child->parent = tree;
 	return child;
+}
+
+t_tree			*insert_child(t_tree *tree, unsigned long value)
+{
+	t_tree		*tmp;
+
+	tmp = init_tree(value);
+	return insert_child_t(tree, tmp);
 }
 
 void			destroy_tree(t_tree *tree)

@@ -7,8 +7,10 @@ INCLUDE=-I inc
 
 SRC_DIR=src
 
-FILES=archiver.c \
-      creator.c
+FILES=archiver.c	\
+      creator.c		\
+      tree.c		\
+      smartstr.c	\
 
 SOURCE=$(patsubst %.c, src/%.c, $(FILES))
 

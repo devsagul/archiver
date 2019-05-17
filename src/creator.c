@@ -6,7 +6,7 @@
 
 #include "archiver.h"
 
-static void append_integer(FILE* file, int nbr)
+static void append_integer(FILE *file, int nbr)
 {
 	char bytes[5];
 	size_t written;
@@ -16,8 +16,7 @@ static void append_integer(FILE* file, int nbr)
 	bytes[2] = (nbr >> 0x08) & 0xFF;
 	bytes[3] = nbr & 0xFF;
 	written = fwrite(file, sizeof(char), 4, bytes);
-	if (written != 4)
-	{
+	if (written != 4) {
 		perror("Error writing file");
 		exit(EXIT_FAILURE);
 	}
@@ -31,8 +30,7 @@ static void append_string(FILE *file, char *str)
 	len = strlen(s);
 	append_integer(file, len);
 	written = fwrite(file, sizeof(char), len, str);
-	if (written != len)
-	{
+	if (written != len) {
 		perror("Error writing file");
 		exit(EXIT_FAILURE);
 	}
@@ -78,7 +76,7 @@ int create_archive(char *archive_name, char **members, int member_count)
 	append_string(archive, serialized);
 	destroy_tree(tree);
 	for (i = 0; i < member_count; i++)
-		append_file(archive, members[i]);}
+		append_file(archive, members[i]);
 	tmp = fclose(archive);
 	if (tmp == EOF)	{
 		perror("Error closing file");
