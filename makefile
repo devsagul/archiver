@@ -3,14 +3,16 @@ TARGET=archiver
 
 CFLAGS=-Wall -Werror -Wextra
 
+INCLUDE=-I inc
+
 SRC_DIR=src
 
-FILES= archiver.c \
+FILES=archiver.c \
+      creator.c
 
-SOURCE=$(join $(SRC_DIR)/, $(FILES))
+SOURCE=$(patsubst %.c, src/%.c, $(FILES))
 
-OBJ=$(join obj/, $(notdir $(SOURCE:.c=.o)))
-
+OBJ=$(patsubst src/%.c, obj/%.o, $(SOURCE))
 
 all: $(TARGET)
 	@true
@@ -20,7 +22,7 @@ $(TARGET): $(OBJ)
 
 obj/%.o: src/%.c
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 clean:
 	@rm -f $(OBJ)
@@ -31,4 +33,5 @@ fclean: clean
 re: fclean all
 
 check:
+	@echo $(SOURCE)
 	./checkpatch.pl --no-tree -f $(SOURCE)
