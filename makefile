@@ -7,7 +7,7 @@ SRC_DIR=src
 
 FILES= archiver.c \
 
-SOURCE=$(join $(SRC_DIR/), $(FILES))
+SOURCE=$(join $(SRC_DIR)/, $(FILES))
 
 OBJ=$(join obj/, $(notdir $(SOURCE:.c=.o)))
 
@@ -29,3 +29,6 @@ fclean: clean
 	@rm -f $(TARGET)
 
 re: fclean all
+
+check:
+	./checkpatch.pl --no-tree -f $(SOURCE)
