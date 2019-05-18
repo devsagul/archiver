@@ -59,6 +59,10 @@ int				extract_archive(char *archive_name)
 	size_t			i;
 
 	archive = fopen(archive_name, "rb");
+	if (!archive) {
+		perror("Error opening file");
+		exit(EXIT_FAILURE);
+	}
 	fread(&count, sizeof(unsigned long), 1, archive);
 	meta = malloc(sizeof(t_fileinfo) * count);
 	for (i = 0; i < count; i++) {

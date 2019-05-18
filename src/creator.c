@@ -60,7 +60,10 @@ static void		add_arc_mem(char *filename,
 
 	(*id)++;
 	*meta = realloc(*meta, sizeof(t_fileinfo) * (*id));
-	stat(filename, &filestat);
+	if (stat(filename, &filestat) == -1) {
+		perror("Error opening file");
+		exit(EXIT_FAILURE);
+	}
 	(*meta)[*id - 1].owner = filestat.st_uid;
 	(*meta)[*id - 1].group = filestat.st_gid;
 	(*meta)[*id - 1].size = filestat.st_size;
