@@ -27,13 +27,13 @@ int main(int argc, char **argv)
 	if (argc == 1)
 		return print_usage(argv[0]);
 	mod = argv[1];
-/*	if (!strcmp(mod, "t") || !strcmp(mod, "x")) {
+	if (!strcmp(mod, "t") || !strcmp(mod, "x")) {
 		if (argc != 3)
 			exit_alt("No archive provided",
 				 "Too many arguments",
 				 argc == 2);
-		return !strcmp(mod, "t") ? print_table(argv[2]) : extract_archive(argv[2]);
-	}*/
+		return !strcmp(mod, "t") ? print_table(argv[2]) : 0;//extract_archive(argv[2]);
+	}
 	if (!strcmp(mod, "c")) {
 		if (argc < 4)
 			exit_alt("No archive name provided",

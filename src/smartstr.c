@@ -36,6 +36,7 @@ t_smartstr		*init_smartstr(void)
 	res->str = (char *)malloc(sizeof(char) * SMARTSTR_SIZE);
 	if (res->str == NULL)
 		return res;
+	res->str[0] = '\0';
 	res->size = SMARTSTR_SIZE;
 	return res;
 }

@@ -21,29 +21,27 @@ static void		add_archive_directory(char *filename, t_tree *tree,
 	DIR		*dir;
 	struct dirent	*entry;
 	
-	(*id)++;
-	*meta = realloc(*meta, sizeof(t_fileinfo) * (*id));
 	child = insert_child(tree, *id);
 	if (child == NULL || meta == NULL) {
 		perror("Error allocating memory");
 		exit(EXIT_FAILURE);
 	}
+	dir = opendir(filename);
 	tmp = chdir(filename);
-	if (tmp == -1) {
+	/*if (tmp == -1) {
 		perror("Error accessing file");
 		exit(EXIT_FAILURE);
-	}
-	dir = opendir(",");
+	}*/
 	while ((entry = readdir(dir)) != NULL) {
-		add_archive_member(entry->d_name, tree, meta, id);
-		free(entry);
+		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, ".."))
+			add_archive_member(entry->d_name, child, meta, id);
 	}
+	closedir(dir);
 	tmp = chdir("..");
 	if (tmp == -1) {
 		perror("Error accessing file");
 		exit(EXIT_FAILURE);
 	}
-	closedir(dir);
 }
 
 static void		add_archive_file(t_tree *tree,
@@ -51,8 +49,6 @@ static void		add_archive_file(t_tree *tree,
 {
 	t_tree		*child;
 
-	(*id)++;
-	*meta = realloc(*meta, sizeof(t_fileinfo) * (*id));
 	child = insert_child(tree, *id);
 	if (child == NULL || meta == NULL) {
 		perror("Error allocating memory");
@@ -60,22 +56,26 @@ static void		add_archive_file(t_tree *tree,
 	}
 }
 
+#include <stdio.h>
+
 static void		add_archive_member(char *filename, t_tree *tree,
 					   t_fileinfo **meta, unsigned long *id)
 {
 	struct stat	filestat;
 
 	// todo: add error checking
+	(*id)++;
+	*meta = realloc(*meta, sizeof(t_fileinfo) * (*id));
 	stat(filename, &filestat);
+	(*meta)[*id - 1].owner = filestat.st_uid;
+	(*meta)[*id - 1].group = filestat.st_gid;
+	(*meta)[*id - 1].size = filestat.st_size;
+	(*meta)[*id - 1].mode = filestat.st_mode;
+	strcpy((*meta)[*id - 1].name, basename(filename));
 	if (S_ISDIR(filestat.st_mode))
 		add_archive_directory(filename, tree, meta, id);
 	else
 		add_archive_file(tree, meta, id);
-	meta[*id - 1]->owner = filestat.st_uid;
-	meta[*id - 1]->group = filestat.st_gid;
-	meta[*id - 1]->size = filestat.st_size;
-	meta[*id - 1]->mode = filestat.st_mode;
-	strcpy(meta[*id - 1]->name, basename(filename));
 }
 
 void			check_writing_error(size_t res)
@@ -91,6 +91,7 @@ size_t			push_meta(FILE *archive, t_fileinfo *meta, unsigned int count)
 	unsigned int	i;
 	size_t		written;
 
+	// todo error handling
 	for (i = 0; i < count; i++) {
 		written = fwrite(&(meta[i].owner), sizeof(uid_t), 1, archive);
 		written = fwrite(&(meta[i].group), sizeof(gid_t), 1, archive);
@@ -127,7 +128,11 @@ size_t			push_files(FILE *archive, t_tree *tree, t_fileinfo *meta)
 	size_t		size_read;
 	FILE		*f;
 	
-	if (tree->children_count == 0) {
+	if (tree->value == 0) {
+		for (i = 0; i < tree->children_count; i++)
+			push_files(archive, tree->children[i], meta);
+	}
+	else if (tree->children_count == 0) {
 		f = fopen(meta[tree->value - 1].name, "rb");
 		while ((size_read = fread(buffer, sizeof(char), BUFFSIZE, f)) != 0) {
 			fwrite(buffer, sizeof(char), size_read, archive);
@@ -162,7 +167,7 @@ int			create_archive(char *archive_name, char **members, int member_count)
 	tree = init_tree(id);
 	for (i = 0; i < member_count; i++)
 		add_archive_member(members[i], tree, &meta, &id);
-	tmp = fwrite(&id, sizeof(unsigned int), 1, archive);
+	tmp = fwrite(&id, sizeof(unsigned long), 1, archive);
 	if (tmp != 1) {
 		perror("Error writing file");
 		exit(EXIT_FAILURE);
