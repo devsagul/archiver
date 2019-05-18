@@ -9,9 +9,11 @@
 #include "tree.h"
 #include "archiver.h"
 
-static void			extract_tree(t_tree *tree, t_fileinfo *meta, FILE *src)
+static void			extract_tree(t_tree *tree,
+					     t_fileinfo *meta,
+					     FILE *src)
 {
-	unsigned long	id;
+	unsigned long		id;
 	FILE			*f;
 	char			*filename;
 	off_t			size;

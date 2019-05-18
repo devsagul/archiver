@@ -10,18 +10,18 @@
 #include "tree.h"
 #include "archiver.h"
 
-static void			add_archive_member(char *filename,
-					   t_tree * tree,
-					   t_fileinfo * *meta,
-					   unsigned long *id);
+static void		add_arc_mem(char *filename,
+				    t_tree * tree,
+				    t_fileinfo * *meta,
+				    unsigned long *id);
 
-static void			add_archive_directory(char *filename, t_tree *tree,
-					      t_fileinfo **meta,
-					      unsigned long *id)
+static void		add_arc_dir(char *filename, t_tree *tree,
+				    t_fileinfo **meta,
+				    unsigned long *id)
 {
-	t_tree			*child;
-	int				tmp;
-	DIR				*dir;
+	t_tree		*child;
+	int		tmp;
+	DIR		*dir;
 	struct dirent	*entry;
 
 	child = insert_child(tree, *id);
@@ -33,7 +33,7 @@ static void			add_archive_directory(char *filename, t_tree *tree,
 	tmp = chdir(filename);
 	while ((entry = readdir(dir))) {
 		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, ".."))
-			add_archive_member(entry->d_name, child, meta, id);
+			add_arc_mem(entry->d_name, child, meta, id);
 	}
 	closedir(dir);
 	tmp = chdir("..");
@@ -43,10 +43,11 @@ static void			add_archive_directory(char *filename, t_tree *tree,
 	}
 }
 
-static void			add_archive_file(t_tree *tree,
-					 t_fileinfo **meta, unsigned long *id)
+static void		add_arc_file(t_tree *tree,
+				     t_fileinfo **meta,
+				     unsigned long *id)
 {
-	t_tree			*child;
+	t_tree		*child;
 
 	child = insert_child(tree, *id);
 	if (!child || !meta) {
@@ -55,10 +56,12 @@ static void			add_archive_file(t_tree *tree,
 	}
 }
 
-static void			add_archive_member(char *filename, t_tree *tree,
-					   t_fileinfo **meta, unsigned long *id)
+static void		add_arc_mem(char *filename,
+				    t_tree *tree,
+				    t_fileinfo **meta,
+				    unsigned long *id)
 {
-	struct stat		filestat;
+	struct stat	filestat;
 	// todo: add error checking
 	(*id)++;
 	*meta = realloc(*meta, sizeof(t_fileinfo) * (*id));
@@ -69,9 +72,9 @@ static void			add_archive_member(char *filename, t_tree *tree,
 	(*meta)[*id - 1].mode = filestat.st_mode;
 	strcpy((*meta)[*id - 1].name, basename(filename));
 	if (S_ISDIR(filestat.st_mode))
-		add_archive_directory(filename, tree, meta, id);
+		add_arc_dir(filename, tree, meta, id);
 	else
-		add_archive_file(tree, meta, id);
+		add_arc_file(tree, meta, id);
 }
 
 void				check_writing_error(size_t res)
@@ -82,11 +85,12 @@ void				check_writing_error(size_t res)
 	}
 }
 
-size_t				push_meta(FILE *archive, t_fileinfo *meta,
+size_t			push_meta(FILE *archive,
+				  t_fileinfo *meta,
 				  unsigned int count)
 {
 	unsigned int	i;
-	size_t			written;
+	size_t		written;
 
 	// todo error handling
 	for (i = 0; i < count; i++) {
@@ -99,10 +103,10 @@ size_t				push_meta(FILE *archive, t_fileinfo *meta,
 	return written;
 }
 
-size_t				push_tree(FILE *archive, t_tree *tree)
+size_t			push_tree(FILE *archive, t_tree *tree)
 {
-	t_smartstr		*sstr;
-	size_t			tmp;
+	t_smartstr	*sstr;
+	size_t		tmp;
 
 	sstr = serialize_tree(tree);
 	tmp = fwrite(&sstr->actual_size, sizeof(size_t), 1, archive);
@@ -118,13 +122,14 @@ size_t				push_tree(FILE *archive, t_tree *tree)
 	return 0;
 }
 
-size_t				push_files(FILE *archive, t_tree *tree,
+size_t			push_files(FILE *archive,
+				   t_tree *tree,
 				   t_fileinfo *meta)
 {
-	char			buffer[BUFFSIZE];
-	size_t			i;
-	size_t			size_read;
-	FILE			*f;
+	char		buffer[BUFFSIZE];
+	size_t		i;
+	size_t		size_read;
+	FILE		*f;
 
 	if (tree->value == 0) {
 		for (i = 0; i < tree->children_count; i++)
@@ -147,15 +152,15 @@ size_t				push_files(FILE *archive, t_tree *tree,
 	return 0;
 }
 
-int					create_archive(char *archive_name,
+int			create_archive(char *archive_name,
 				       char **members, int member_count)
 {
-	FILE			*archive;
-	t_fileinfo		*meta;
+	FILE		*archive;
+	t_fileinfo	*meta;
 	unsigned long	id;
-	t_tree			*tree;
-	int				i;
-	size_t			tmp;
+	t_tree		*tree;
+	int		i;
+	size_t		tmp;
 
 	archive = fopen(archive_name, "wb");
 	if (!archive) {
@@ -166,7 +171,7 @@ int					create_archive(char *archive_name,
 	id = 0;
 	tree = init_tree(id);
 	for (i = 0; i < member_count; i++)
-		add_archive_member(members[i], tree, &meta, &id);
+		add_arc_mem(members[i], tree, &meta, &id);
 	tmp = fwrite(&id, sizeof(unsigned long), 1, archive);
 	if (tmp != 1) {
 		perror("Error writing file");
