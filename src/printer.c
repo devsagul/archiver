@@ -63,5 +63,7 @@ int					print_table(char *archive_name)
 	delete_smartstr(sstr);
 	printf("id;name;parent;type;size\n");
 	print_info(meta, tree);
+	free(meta);
+	destroy_tree(tree);
 	return 0;
 }
