@@ -12,6 +12,7 @@ FILES=archiver.c	\
       tree.c		\
       smartstr.c	\
       printer.c		\
+      extractor.c	\
 
 SOURCE=$(patsubst %.c, src/%.c, $(FILES))
 
