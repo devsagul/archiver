@@ -10,7 +10,8 @@ int print_usage(char *name)
 	printf("Usage: %s [operation] archive [member...]", name);
 	printf("mods:\nt -- prints contents table of the given arhive.\n");
 	printf("c -- creates archive from given members.\n");
-	printf("x -- extracts contents of the archive into current directory.\n");
+	printf("x -- extracts contents of the archive ");
+	printf("into current directory.\n");
 	return EXIT_SUCCESS;
 }
 
@@ -32,7 +33,9 @@ int main(int argc, char **argv)
 			exit_alt("No archive provided",
 				 "Too many arguments",
 				 argc == 2);
-		return !strcmp(mod, "t") ? print_table(argv[2]) : extract_archive(argv[2]);
+		return !strcmp(mod, "t") ?
+			print_table(argv[2]) :
+			extract_archive(argv[2]);
 	}
 	if (!strcmp(mod, "c")) {
 		if (argc < 4)

@@ -10,29 +10,29 @@
 #include "tree.h"
 #include "archiver.h"
 
-static void		add_archive_member(char *filename, t_tree *tree,
-					   t_fileinfo **meta, unsigned long *id);
+static void		add_archive_member(char *filename,
+					   t_tree * tree,
+					   t_fileinfo * *meta,
+					   unsigned long *id);
 
 static void		add_archive_directory(char *filename, t_tree *tree,
-					      t_fileinfo **meta, unsigned long *id)
+					      t_fileinfo **meta,
+					      unsigned long *id)
 {
 	t_tree		*child;
 	int		tmp;
-	DIR		*dir;
+
+	DIR	*dir;
 	struct dirent	*entry;
-	
+
 	child = insert_child(tree, *id);
-	if (child == NULL || meta == NULL) {
+	if (!child || !meta) {
 		perror("Error allocating memory");
 		exit(EXIT_FAILURE);
 	}
 	dir = opendir(filename);
 	tmp = chdir(filename);
-	/*if (tmp == -1) {
-		perror("Error accessing file");
-		exit(EXIT_FAILURE);
-	}*/
-	while ((entry = readdir(dir)) != NULL) {
+	while ((entry = readdir(dir))) {
 		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, ".."))
 			add_archive_member(entry->d_name, child, meta, id);
 	}
@@ -50,19 +50,16 @@ static void		add_archive_file(t_tree *tree,
 	t_tree		*child;
 
 	child = insert_child(tree, *id);
-	if (child == NULL || meta == NULL) {
+	if (!child || !meta) {
 		perror("Error allocating memory");
 		exit(EXIT_FAILURE);
 	}
 }
 
-#include <stdio.h>
-
 static void		add_archive_member(char *filename, t_tree *tree,
 					   t_fileinfo **meta, unsigned long *id)
 {
 	struct stat	filestat;
-
 	// todo: add error checking
 	(*id)++;
 	*meta = realloc(*meta, sizeof(t_fileinfo) * (*id));
@@ -80,23 +77,24 @@ static void		add_archive_member(char *filename, t_tree *tree,
 
 void			check_writing_error(size_t res)
 {
-	if (res == (size_t) EOF) {
+	if (res == (size_t)EOF) {
 		perror("Error writing file");
 		exit(EXIT_FAILURE);
 	}
 }
 
-size_t			push_meta(FILE *archive, t_fileinfo *meta, unsigned int count)
+size_t			push_meta(FILE *archive, t_fileinfo *meta,
+				  unsigned int count)
 {
 	unsigned int	i;
 	size_t		written;
 
 	// todo error handling
 	for (i = 0; i < count; i++) {
-		written = fwrite(&(meta[i].owner), sizeof(uid_t), 1, archive);
-		written = fwrite(&(meta[i].group), sizeof(gid_t), 1, archive);
-		written = fwrite(&(meta[i].size), sizeof(off_t), 1, archive);
-		written = fwrite(&(meta[i].mode), sizeof(mode_t), 1, archive);
+		written = fwrite(&meta[i].owner, sizeof(uid_t), 1, archive);
+		written = fwrite(&meta[i].group, sizeof(gid_t), 1, archive);
+		written = fwrite(&meta[i].size, sizeof(off_t), 1, archive);
+		written = fwrite(&meta[i].mode, sizeof(mode_t), 1, archive);
 		written = fwrite(meta[i].name, sizeof(char), 255, archive);
 	}
 	return written;
@@ -108,33 +106,35 @@ size_t			push_tree(FILE *archive, t_tree *tree)
 	size_t		tmp;
 
 	sstr = serialize_tree(tree);
-	tmp = fwrite(&(sstr->actual_size), sizeof(size_t), 1, archive);
-	if (tmp == (size_t) EOF) {
+	tmp = fwrite(&sstr->actual_size, sizeof(size_t), 1, archive);
+	if (tmp == (size_t)EOF) {
 		perror("Error writing file");
 		exit(EXIT_FAILURE);
 	}
 	tmp = fwrite(sstr->str, sizeof(char), sstr->actual_size, archive);
-	if (tmp == (size_t) EOF) {
+	if (tmp == (size_t)EOF) {
 		perror("Error writing file");
 		exit(EXIT_FAILURE);
 	}
 	return 0;
 }
 
-size_t			push_files(FILE *archive, t_tree *tree, t_fileinfo *meta)
+size_t			push_files(FILE *archive, t_tree *tree,
+				   t_fileinfo *meta)
 {
 	char		buffer[BUFFSIZE];
 	size_t		i;
 	size_t		size_read;
 	FILE		*f;
-	
+
 	if (tree->value == 0) {
 		for (i = 0; i < tree->children_count; i++)
 			push_files(archive, tree->children[i], meta);
-	}
-	else if (tree->children_count == 0) {
+	} else if (tree->children_count == 0) {
 		f = fopen(meta[tree->value - 1].name, "rb");
-		while ((size_read = fread(buffer, sizeof(char), BUFFSIZE, f)) != 0) {
+		while ((size_read = fread(buffer,
+					  sizeof(char),
+					  BUFFSIZE, f)) != 0) {
 			fwrite(buffer, sizeof(char), size_read, archive);
 		}
 		fclose(f);
@@ -148,7 +148,8 @@ size_t			push_files(FILE *archive, t_tree *tree, t_fileinfo *meta)
 	return 0;
 }
 
-int			create_archive(char *archive_name, char **members, int member_count)
+int			create_archive(char *archive_name,
+				       char **members, int member_count)
 {
 	FILE		*archive;
 	t_fileinfo	*meta;
@@ -158,7 +159,7 @@ int			create_archive(char *archive_name, char **members, int member_count)
 	size_t		tmp;
 
 	archive = fopen(archive_name, "wb");
-	if (archive == NULL) {
+	if (!archive) {
 		perror("Error opening file");
 		exit(EXIT_FAILURE);
 	}

@@ -9,7 +9,7 @@ t_tree			*init_tree(unsigned long value)
 	t_tree		*res;
 
 	res = (t_tree *)malloc(sizeof(t_tree));
-	if (res == NULL)
+	if (!res)
 		return NULL;
 	res->value = value;
 	res->parent = NULL;
@@ -24,7 +24,7 @@ static t_tree		*insert_child_t(t_tree *tree, t_tree *child)
 
 	tmp = realloc(tree->children, sizeof(t_tree *) *
 				      (tree->children_count + 1));
-	if (tmp == NULL)
+	if (!tmp)
 		return NULL;
 	tree->children = tmp;
 	tree->children[tree->children_count] = child;
@@ -47,7 +47,7 @@ void			destroy_tree(t_tree *tree)
 
 	for (i = 0; i < tree->children_count; i++)
 		destroy_tree(tree->children[i]);
-	if (tree->children != NULL)
+	if (tree->children)
 		free(tree->children);
 	free(tree);
 }
@@ -77,11 +77,11 @@ t_tree			*deserialize_tree(t_smartstr *serialized)
 
 	value = get_ul(serialized);
 	res = init_tree(value);
-	if (res == NULL)
+	if (!res)
 		return NULL;
 	while (get_current(serialized) != '^') {
 		tmp = insert_child_t(res, deserialize_tree(serialized));
-		if (tmp == NULL) {
+		if (!tmp) {
 			destroy_tree(res);
 			return NULL;
 		}

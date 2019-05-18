@@ -28,13 +28,13 @@ t_smartstr		*init_smartstr(void)
 	t_smartstr	*res;
 
 	res = malloc(sizeof(t_smartstr));
-	if (res == NULL)
+	if (!res)
 		return NULL;
 	res->size = 0;
 	res->actual_size = 0;
 	res->pos = 0;
 	res->str = (char *)malloc(sizeof(char) * SMARTSTR_SIZE);
-	if (res->str == NULL)
+	if (!res->str)
 		return res;
 	res->str[0] = '\0';
 	res->size = SMARTSTR_SIZE;
@@ -51,7 +51,7 @@ void			append_ul(t_smartstr *sstr, unsigned long value)
 	mask = 0xFF;
 	mask <<= ((sizeof(unsigned long) - 1) << 3);
 	for (i = 1; i <= sizeof(unsigned long); i++) {
-		buff[sizeof(unsigned long) - i] = (char) ((value & mask) >>
+		buff[sizeof(unsigned long) - i] = (char)((value & mask) >>
 				 ((sizeof(unsigned long) - i) << 3));
 		mask >>= 0x08;
 	}
@@ -107,7 +107,8 @@ unsigned long		get_ul(t_smartstr *sstr)
 	res = 0;
 	for (i = 1; i <= sizeof(unsigned long); i++) {
 		res <<= 8;
-		res += (unsigned char) sstr->str[sizeof(unsigned long) + sstr->pos - i];
+		res += (unsigned char) sstr->str[sizeof(unsigned long) +
+			sstr->pos - i];
 	}
 	sstr->pos += sizeof(unsigned long);
 	return res;

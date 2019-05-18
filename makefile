@@ -36,6 +36,14 @@ fclean: clean
 
 re: fclean all
 
-check:
+check_formatting:
 	@echo $(SOURCE)
-	./checkpatch.pl --no-tree -f $(SOURCE)
+	./checkpatch.pl --no-tree --terse --show-types --strict --ignore CONST_STRUCT -f $(SOURCE)
+
+check: check_formatting
+
+test: re check
+	@$(CC) tests/tree.c src/tree.c src/smartstr.c -I inc -o tests/tree
+	./tests/tree
+	rm -f tests/tree
+	cd tests; sh main_test.sh
