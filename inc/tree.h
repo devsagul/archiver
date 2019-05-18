@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 
 #include <stdlib.h>
+#include "smartstr.h"
 
 #ifndef TREE_H
 # define TREE_H

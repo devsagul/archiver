@@ -57,7 +57,6 @@ t_smartstr		*serialize_tree(t_tree *tree)
 	t_smartstr	*res;
 	t_smartstr	*tmp;
 	size_t		i;
-	char		bytes[sizeof(unsigned long)];
 
 	res = init_smartstr();
 	append_ul(res, tree->value);
