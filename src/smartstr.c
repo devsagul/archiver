@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include "smartstr.h"
 
-static void		expand(t_smartstr *sstr)
+static void			expand(t_smartstr *sstr)
 {
-	size_t		tmp;
-	char		*b;
+	size_t			tmp;
+	char			*b;
 
 	tmp = sstr->size << 1;
 	if (tmp == 0) {
@@ -23,9 +23,9 @@ static void		expand(t_smartstr *sstr)
 	sstr->str = b;
 }
 
-t_smartstr		*init_smartstr(void)
+t_smartstr			*init_smartstr(void)
 {
-	t_smartstr	*res;
+	t_smartstr		*res;
 
 	res = malloc(sizeof(t_smartstr));
 	if (!res)
@@ -41,11 +41,11 @@ t_smartstr		*init_smartstr(void)
 	return res;
 }
 
-void			append_ul(t_smartstr *sstr, unsigned long value)
+void				append_ul(t_smartstr *sstr, unsigned long value)
 {
-	char		buff[sizeof(unsigned long)];
+	char			buff[sizeof(unsigned long)];
 	unsigned long	mask;
-	size_t		i;
+	size_t			i;
 
 	memset(buff, 0, sizeof(unsigned long));
 	mask = 0xFF;
@@ -58,7 +58,7 @@ void			append_ul(t_smartstr *sstr, unsigned long value)
 	append_bytes(sstr, buff, sizeof(unsigned long));
 }
 
-void			append_bytes(t_smartstr *sstr, char *buff, size_t size)
+void				append_bytes(t_smartstr *sstr, char *buff, size_t size)
 {
 	while (sstr->size < sstr->actual_size + size + 1) {
 		expand(sstr);
@@ -70,12 +70,12 @@ void			append_bytes(t_smartstr *sstr, char *buff, size_t size)
 	sstr->str[sstr->actual_size] = '\0';
 }
 
-void			join_smartstrs(t_smartstr *left, t_smartstr *right)
+void				join_smartstrs(t_smartstr *left, t_smartstr *right)
 {
 	append_bytes(left, right->str, right->actual_size);
 }
 
-void			delete_smartstr(t_smartstr *sstr)
+void				delete_smartstr(t_smartstr *sstr)
 {
 	free(sstr->str);
 	sstr->size = 0;
@@ -84,17 +84,17 @@ void			delete_smartstr(t_smartstr *sstr)
 	free(sstr);
 }
 
-void			append_str(t_smartstr *sstr, char *str)
+void				append_str(t_smartstr *sstr, char *str)
 {
 	append_bytes(sstr, str, strlen(str));
 }
 
-char			get_current(t_smartstr *sstr)
+char				get_current(t_smartstr *sstr)
 {
 	return sstr->str[sstr->pos];
 }
 
-void			smartstr_move(t_smartstr *sstr, size_t mov)
+void				smartstr_move(t_smartstr *sstr, size_t mov)
 {
 	sstr->pos += mov;
 }

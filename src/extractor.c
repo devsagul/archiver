@@ -9,15 +9,15 @@
 #include "tree.h"
 #include "archiver.h"
 
-static void	extract_tree(t_tree *tree, t_fileinfo *meta, FILE *src)
+static void			extract_tree(t_tree *tree, t_fileinfo *meta, FILE *src)
 {
 	unsigned long	id;
-	FILE		*f;
-	char		*filename;
-	off_t		size;
-	size_t		buff_size;
-	char		buffer[BUFFSIZE];
-	size_t		i;
+	FILE			*f;
+	char			*filename;
+	off_t			ize;
+	size_t			buff_size;
+	char			buffer[BUFFSIZE];
+	size_t			i;
 
 	id = tree->value;
 	if (S_ISDIR(meta[id - 1].mode)) {
@@ -44,16 +44,16 @@ static void	extract_tree(t_tree *tree, t_fileinfo *meta, FILE *src)
 	}
 }
 
-int	extract_archive(char *archive_name)
+int					extract_archive(char *archive_name)
 {
-	FILE *archive;
+	FILE			*archive;
 	unsigned long	count;
-	t_fileinfo	*meta;
-	size_t		tree_size;
-	t_smartstr	*sstr;
-	char		*str;
-	t_tree		*tree;
-	size_t		i;
+	t_fileinfo		*meta;
+	size_t			tree_size;
+	t_smartstr		*sstr;
+	char			*str;
+	t_tree			*tree;
+	size_t			i;
 
 	archive = fopen(archive_name, "rb");
 	fread(&count, sizeof(unsigned long), 1, archive);

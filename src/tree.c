@@ -4,9 +4,9 @@
 #include "smartstr.h"
 #include "tree.h"
 
-t_tree			*init_tree(unsigned long value)
+t_tree				*init_tree(unsigned long value)
 {
-	t_tree		*res;
+	t_tree			*res;
 
 	res = (t_tree *)malloc(sizeof(t_tree));
 	if (!res)
@@ -20,7 +20,7 @@ t_tree			*init_tree(unsigned long value)
 
 static t_tree		*insert_child_t(t_tree *tree, t_tree *child)
 {
-	t_tree		**tmp;
+	t_tree			**tmp;
 
 	tmp = realloc(tree->children, sizeof(t_tree *) *
 				      (tree->children_count + 1));
@@ -33,17 +33,17 @@ static t_tree		*insert_child_t(t_tree *tree, t_tree *child)
 	return child;
 }
 
-t_tree			*insert_child(t_tree *tree, unsigned long value)
+t_tree				*insert_child(t_tree *tree, unsigned long value)
 {
-	t_tree		*tmp;
+	t_tree			*tmp;
 
 	tmp = init_tree(value);
 	return insert_child_t(tree, tmp);
 }
 
-void			destroy_tree(t_tree *tree)
+void				destroy_tree(t_tree *tree)
 {
-	size_t		i;
+	size_t			i;
 
 	for (i = 0; i < tree->children_count; i++)
 		destroy_tree(tree->children[i]);
@@ -52,11 +52,11 @@ void			destroy_tree(t_tree *tree)
 	free(tree);
 }
 
-t_smartstr		*serialize_tree(t_tree *tree)
+t_smartstr			*serialize_tree(t_tree *tree)
 {
-	t_smartstr	*res;
-	t_smartstr	*tmp;
-	size_t		i;
+	t_smartstr		*res;
+	t_smartstr		*tmp;
+	size_t			i;
 
 	res = init_smartstr();
 	append_ul(res, tree->value);
@@ -69,11 +69,11 @@ t_smartstr		*serialize_tree(t_tree *tree)
 	return res;
 }
 
-t_tree			*deserialize_tree(t_smartstr *serialized)
+t_tree				*deserialize_tree(t_smartstr *serialized)
 {
 	unsigned long	value;
-	t_tree		*res;
-	t_tree		*tmp;
+	t_tree			*res;
+	t_tree			*tmp;
 
 	value = get_ul(serialized);
 	res = init_tree(value);

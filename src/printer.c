@@ -9,11 +9,11 @@
 #include "tree.h"
 #include "archiver.h"
 
-static void	print_info(t_fileinfo *meta, t_tree *tree)
+static void			print_info(t_fileinfo *meta, t_tree *tree)
 {
 	unsigned long	id;
-	char		type;
-	size_t		i;
+	char			type;
+	size_t			i;
 
 	id = tree->value;
 	if (id != 0) {
@@ -25,16 +25,16 @@ static void	print_info(t_fileinfo *meta, t_tree *tree)
 		print_info(meta, tree->children[i]);
 }
 
-int	print_table(char *archive_name)
+int					print_table(char *archive_name)
 {
-	FILE *archive;
+	FILE			*archive;
 	unsigned long	count;
-	t_fileinfo	*meta;
-	size_t		tree_size;
-	t_smartstr	*sstr;
-	char		*str;
-	t_tree		*tree;
-	size_t		i;
+	t_fileinfo		*meta;
+	size_t			tree_size;
+	t_smartstr		*sstr;
+	char			*str;
+	t_tree			*tree;
+	size_t			i;
 
 	// todo error handling
 	archive = fopen(archive_name, "rb");

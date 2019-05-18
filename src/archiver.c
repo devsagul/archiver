@@ -5,7 +5,7 @@
 #include <string.h>
 #include "archiver.h"
 
-int print_usage(char *name)
+int			print_usage(char *name)
 {
 	printf("Usage: %s [operation] archive [member...]", name);
 	printf("mods:\nt -- prints contents table of the given arhive.\n");
@@ -15,15 +15,15 @@ int print_usage(char *name)
 	return EXIT_SUCCESS;
 }
 
-void exit_alt(char *error1, char *error2, int condition)
+void		exit_alt(char *error1, char *error2, int condition)
 {
 	fprintf(stderr, "%s\n", condition ? error1 : error2);
 	exit(EXIT_FAILURE);
 }
 
-int main(int argc, char **argv)
+int			main(int argc, char **argv)
 {
-	char *mod;
+	char	*mod;
 
 	if (argc == 1)
 		return print_usage(argv[0]);
