@@ -18,7 +18,7 @@ t_tree				*init_tree(unsigned long value)
 	return res;
 }
 
-static t_tree		*insert_child_t(t_tree *tree, t_tree *child)
+static t_tree			*insert_child_t(t_tree *tree, t_tree *child)
 {
 	t_tree			**tmp;
 
@@ -55,12 +55,13 @@ void				destroy_tree(t_tree *tree)
 t_smartstr			*serialize_tree(t_tree *tree)
 {
 	t_smartstr		*res;
-	t_smartstr		*tmp;
 	size_t			i;
 
 	res = init_smartstr();
 	append_ul(res, tree->value);
 	for (i = 0; i < tree->children_count; i++) {
+		t_smartstr	*tmp;
+
 		tmp = serialize_tree(tree->children[i]);
 		join_smartstrs(res, tmp);
 		delete_smartstr(tmp);
@@ -71,15 +72,16 @@ t_smartstr			*serialize_tree(t_tree *tree)
 
 t_tree				*deserialize_tree(t_smartstr *serialized)
 {
-	unsigned long	value;
+	unsigned long		value;
 	t_tree			*res;
-	t_tree			*tmp;
 
 	value = get_ul(serialized);
 	res = init_tree(value);
 	if (!res)
 		return NULL;
 	while (get_current(serialized) != '^') {
+		t_tree		*tmp;
+
 		tmp = insert_child_t(res, deserialize_tree(serialized));
 		if (!tmp) {
 			destroy_tree(res);

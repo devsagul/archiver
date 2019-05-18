@@ -14,28 +14,29 @@ static void			extract_tree(t_tree *tree,
 					     FILE *src)
 {
 	unsigned long		id;
-	FILE			*f;
 	char			*filename;
-	off_t			size;
-	size_t			buff_size;
-	char			buffer[BUFFSIZE];
-	size_t			i;
 
 	id = tree->value;
+	filename = meta[id - 1].name;
 	if (S_ISDIR(meta[id - 1].mode)) {
-		filename = meta[id - 1].name;
-		chown(filename, meta[id - 1].owner, meta[id - 1].group);
 		mkdir(filename, meta[id - 1].mode);
+		chown(filename, meta[id - 1].owner, meta[id - 1].group);
 		chdir(filename);
+		size_t		i;
+
 		for (i = 0; i < tree->children_count; i++)
 			extract_tree(tree->children[i], meta, src);
 		chdir("..");
 	} else {
-		// todo error handling
-		filename = meta[id - 1].name;
+		FILE		*f;
+
 		f = fopen(filename, "wb");
 		chown(filename, meta[id - 1].owner, meta[id - 1].group);
 		chmod(filename, meta[id - 1].mode);
+		off_t		size;
+		size_t		buff_size;
+		char		buffer[BUFFSIZE];
+
 		size = meta[id - 1].size;
 		while ((buff_size = size > BUFFSIZE ? BUFFSIZE : size) != 0) {
 			size -= buff_size;
@@ -46,7 +47,7 @@ static void			extract_tree(t_tree *tree,
 	}
 }
 
-int					extract_archive(char *archive_name)
+int				extract_archive(char *archive_name)
 {
 	FILE			*archive;
 	unsigned long	count;
@@ -77,5 +78,7 @@ int					extract_archive(char *archive_name)
 	delete_smartstr(sstr);
 	for (i = 0; i < tree->children_count; i++)
 		extract_tree(tree->children[i], meta, archive);
+	destroy_tree(tree);
+	free(meta);
 	return EXIT_SUCCESS;
 }

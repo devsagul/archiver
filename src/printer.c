@@ -12,11 +12,12 @@
 static void			print_info(t_fileinfo *meta, t_tree *tree)
 {
 	unsigned long	id;
-	char			type;
-	size_t			i;
+	size_t		i;
 
 	id = tree->value;
 	if (id != 0) {
+		char	type;
+
 		type = S_ISDIR(meta[id - 1].mode) ? 'd' : 'f';
 		printf("%lu;%s;%lu;%c;%jd\n", id, meta[id - 1].name,
 		       tree->parent->value, type, meta[id - 1].size);
@@ -36,8 +37,11 @@ int					print_table(char *archive_name)
 	t_tree			*tree;
 	size_t			i;
 
-	// todo error handling
 	archive = fopen(archive_name, "rb");
+	if (!archive) {
+		perror("Error opening file");
+		exit(EXIT_FAILURE);
+	}
 	fread(&count, sizeof(unsigned long), 1, archive);
 	printf("Number of files in the archive: %lu\n", count);
 	meta = malloc(sizeof(t_fileinfo) * count);

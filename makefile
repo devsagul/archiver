@@ -1,7 +1,7 @@
 CC=gcc
 TARGET=archiver
 
-CFLAGS=-Wall -Werror -Wextra
+CFLAGS=-Wall -Werror -Wextra -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
 INCLUDE=-I inc
 
@@ -40,7 +40,10 @@ check_formatting:
 	@echo $(SOURCE)
 	./checkpatch.pl --no-tree --terse --show-types --strict --ignore CONST_STRUCT -f $(SOURCE)
 
-check: check_formatting
+cpp_check:
+	cppcheck -I inc/ --enable=all --inconclusive --std=posix src
+
+check: check_formatting cpp_check
 
 test: re check
 	@$(CC) tests/tree.c src/tree.c src/smartstr.c -I inc -o tests/tree

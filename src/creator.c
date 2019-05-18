@@ -20,7 +20,6 @@ static void		add_arc_dir(char *filename, t_tree *tree,
 				    unsigned long *id)
 {
 	t_tree		*child;
-	int		tmp;
 	DIR		*dir;
 	struct dirent	*entry;
 
@@ -30,17 +29,13 @@ static void		add_arc_dir(char *filename, t_tree *tree,
 		exit(EXIT_FAILURE);
 	}
 	dir = opendir(filename);
-	tmp = chdir(filename);
+	chdir(filename);
 	while ((entry = readdir(dir))) {
 		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, ".."))
 			add_arc_mem(entry->d_name, child, meta, id);
 	}
 	closedir(dir);
-	tmp = chdir("..");
-	if (tmp == -1) {
-		perror("Error accessing file");
-		exit(EXIT_FAILURE);
-	}
+	chdir("..");
 }
 
 static void		add_arc_file(t_tree *tree,
@@ -62,7 +57,7 @@ static void		add_arc_mem(char *filename,
 				    unsigned long *id)
 {
 	struct stat	filestat;
-	// todo: add error checking
+
 	(*id)++;
 	*meta = realloc(*meta, sizeof(t_fileinfo) * (*id));
 	stat(filename, &filestat);
@@ -77,30 +72,20 @@ static void		add_arc_mem(char *filename,
 		add_arc_file(tree, meta, id);
 }
 
-void				check_writing_error(size_t res)
-{
-	if (res == (size_t)EOF) {
-		perror("Error writing file");
-		exit(EXIT_FAILURE);
-	}
-}
-
 size_t			push_meta(FILE *archive,
 				  t_fileinfo *meta,
 				  unsigned int count)
 {
 	unsigned int	i;
-	size_t		written;
 
-	// todo error handling
 	for (i = 0; i < count; i++) {
-		written = fwrite(&meta[i].owner, sizeof(uid_t), 1, archive);
-		written = fwrite(&meta[i].group, sizeof(gid_t), 1, archive);
-		written = fwrite(&meta[i].size, sizeof(off_t), 1, archive);
-		written = fwrite(&meta[i].mode, sizeof(mode_t), 1, archive);
-		written = fwrite(meta[i].name, sizeof(char), 255, archive);
+		fwrite(&meta[i].owner, sizeof(uid_t), 1, archive);
+		fwrite(&meta[i].group, sizeof(gid_t), 1, archive);
+		fwrite(&meta[i].size, sizeof(off_t), 1, archive);
+		fwrite(&meta[i].mode, sizeof(mode_t), 1, archive);
+		fwrite(meta[i].name, sizeof(char), 255, archive);
 	}
-	return written;
+	return 0;
 }
 
 size_t			push_tree(FILE *archive, t_tree *tree)
@@ -119,6 +104,7 @@ size_t			push_tree(FILE *archive, t_tree *tree)
 		perror("Error writing file");
 		exit(EXIT_FAILURE);
 	}
+	delete_smartstr(sstr);
 	return 0;
 }
 
@@ -143,7 +129,6 @@ size_t			push_files(FILE *archive,
 		}
 		fclose(f);
 	} else {
-		// todo error handling
 		chdir(meta[tree->value - 1].name);
 		for (i = 0; i < tree->children_count; i++)
 			push_files(archive, tree->children[i], meta);
@@ -177,9 +162,10 @@ int			create_archive(char *archive_name,
 		perror("Error writing file");
 		exit(EXIT_FAILURE);
 	}
-	// todo: error checking
 	push_meta(archive, meta, id);
 	push_tree(archive, tree);
 	push_files(archive, tree, meta);
+	free(meta);
+	destroy_tree(tree);
 	return EXIT_SUCCESS;
 }
